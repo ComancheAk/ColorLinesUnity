@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Intro : MonoBehaviour
@@ -6,15 +7,18 @@ public class Intro : MonoBehaviour
     public GameObject background;
     public AudioSource audioSource;
     private bool musicStarted;
+    public GameObject loadingAnimation;
 
     void Awake()
     {
+        loadingAnimation.SetActive(false);
         Helpers.Set2DCameraToObject(background);
     }
 
     void OnMouseUp()
     {
         audioSource.Stop();
+        GotoGameplay();
     }
 
     void Start()
@@ -28,13 +32,22 @@ public class Intro : MonoBehaviour
         }
         else
         {
-            Invoke("GotoGameplay", 1);
+            Invoke("GotoGameplay", 0.7f);
         }
     }
 
     void GotoGameplay()
     {
-        SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+        loadingAnimation.SetActive(true);
+        StartCoroutine(LoadGamePlayAsyncScene());
+    }
+
+    IEnumerator LoadGamePlayAsyncScene()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("GameScene", LoadSceneMode.Single);
+
+        while (!asyncLoad.isDone)
+            yield return null;
     }
 
     void Update()
